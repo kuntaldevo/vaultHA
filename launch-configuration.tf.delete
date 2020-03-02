@@ -1,0 +1,23 @@
+
+
+resource "aws_launch_configuration" "vault" {
+
+  name_prefix          = "vault."
+  image_id      = "${data.aws_ami.aws.id}"
+  instance_type = "${var.instance-type}"
+  iam_instance_profile  = "${aws_iam_instance_profile.vault-instance-profile.id}"
+  key_name              = "${var.aws-key-pair}"
+  security_groups       = ["${aws_security_group.vault.id}"]
+
+#Required by AWS Linux
+  root_block_device {
+    volume_size = "30"
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  user_data = "${data.template_file.vault.rendered}"
+
+}

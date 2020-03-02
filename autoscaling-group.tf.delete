@@ -1,0 +1,35 @@
+
+###
+### For deletion.  For HA Vault only uses one node for ALL requests.  Therefore the load balancer can
+### only have one none available while the others just sit there.
+### If an ELB is connected to an Autoscaling group then when a node becomes unhealthy it is deleted and recreated so I'm removing this
+###
+
+resource "aws_autoscaling_group" "vault" {
+
+  name                      = "vault"
+  availability_zones        = data.aws_availability_zones.all.names
+  max_size                  = "${var.vault-cluster-size}"
+  min_size                  = "${var.vault-cluster-size}"
+  health_check_grace_period = 60
+  health_check_type         = "ELB"
+  desired_capacity          = "${var.vault-cluster-size}"
+  force_delete              = false
+  launch_configuration      = "${aws_launch_configuration.vault.name}"
+  vpc_zone_identifier       = var.subnets
+  load_balancers            = ["${aws_elb.vault.id}"]
+
+
+  tags = [
+    {
+      key                 = "Name"
+      value               = "vault"
+      propagate_at_launch = true
+    },
+    {
+      key                 = "environment_name"
+      value               = "${var.environment-name}"
+      propagate_at_launch = true
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+
+module "library-policy" {
+
+  source = "../module/library-s3-policy"
+
+  create-policy =  "1"
+
+  library-name = "${module.library-name.name}"
+
+  tag-map = var.tag-map
+
+}
